@@ -13,6 +13,7 @@ namespace mf_apis_web_services_fuel_manager.Models
         [Required]
         public DateTime Data { get; set; }
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Valor { get; set; }
         [Required]
         public TipoCombustivel Tipo { get; set; }
@@ -34,3 +35,8 @@ namespace mf_apis_web_services_fuel_manager.Models
 /* Relação Veículos x Consumo é 1:n */
 /* Navegação Virtual: Quando carregar o consumo, irá carregar o veículo associado a esse consumo
  */
+/* A migration deu um warning, para isso:
+ Deu alerta no tipo decimal, então para isso fazer a configuração abaixo, que define um tipo decimal de 18 dígitos e 2 casas pós-vírgula
+ [Column(TypeName = "decimal(18,2)")]
+
+*/
