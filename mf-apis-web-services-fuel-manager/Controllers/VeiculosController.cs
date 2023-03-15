@@ -35,24 +35,51 @@ namespace mf_apis_web_services_fuel_manager.Controllers
             _context.Veiculos.Add(model);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetById", new {id = model.Id}, model);
+            return CreatedAtAction("GetById", new { id = model.Id }, model);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(int id)
-        {
+                {
             var model = await _context.Veiculos
                 .FirstOrDefaultAsync(v => v.Id == id);
 
-            if (model == null) NotFound();
+            if (model == null) return NotFound();
 
             return Ok(model);
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Update(int id, Veiculo model)
+        {
+            if (id != model.Id) return BadRequest();
+
+            var modelDb = _context.Veiculos.AsNoTracking()
+                .FirstOrDefaultAsync(v => v.Id == id);
+
+            if (modelDb == null) return NotFound();
+
+            _context.Veiculos.Update(model);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var model = await _context.Veiculos.FindAsync(id);
+
+            if (model == null) return NotFound();
+
+            _context.Veiculos.Remove(model);
+            await _context.SaveChangesAsync();
+
+            return NoContent();             
+        }
     }
 }
-
-
-
 
 
 
@@ -95,3 +122,21 @@ namespace mf_apis_web_services_fuel_manager.Controllers
 Dessa forma ele retorna o Status ....
 Nesse caso, é utilizado o próprio HTTP para informar que é um criação com sucesso de um recurso;
  */
+
+/*
+  if (id != model.Id) return BadRequest("Id incorreto");
+Essa validação é por segurança, para não ter a possibilidade de trocar um id do objeto no banco
+ */
+
+/*
+    var modelDb = _context.Veiculos.AsNoTracking()
+                .FirstOrDefaultAsync(v => v.Id == id);
+            if (modelDb == null) return NotFound();
+Verificando se existe na base de dados
+ */
+
+/*  var modelDb = _context.Veiculos.AsNoTracking()
+                .FirstOrDefaultAsync(v => v.Id == id);
+
+AsNoTracking(): Serve para não rastrear o dados, ou seja, a consulta não é para alteração.
+*/
