@@ -42,6 +42,7 @@ namespace mf_apis_web_services_fuel_manager.Controllers
         public async Task<ActionResult> GetById(int id)
                 {
             var model = await _context.Veiculos
+                .Include(t => t.Consumos) 
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (model == null) return NotFound();
@@ -54,7 +55,7 @@ namespace mf_apis_web_services_fuel_manager.Controllers
         {
             if (id != model.Id) return BadRequest();
 
-            var modelDb = _context.Veiculos.AsNoTracking()
+            var modelDb = await _context.Veiculos.AsNoTracking()
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (modelDb == null) return NotFound();
@@ -135,8 +136,32 @@ Essa validação é por segurança, para não ter a possibilidade de trocar um i
 Verificando se existe na base de dados
  */
 
-/*  var modelDb = _context.Veiculos.AsNoTracking()
+/*  
+ --------------------ASNOTRACKING
+
+   var modelDb = _context.Veiculos.AsNoTracking()
                 .FirstOrDefaultAsync(v => v.Id == id);
 
 AsNoTracking(): Serve para não rastrear o dados, ou seja, a consulta não é para alteração.
 */
+
+
+/*
+ ----------------------- INCLUDE
+
+ *  [HttpGet("{id}")]
+        public async Task<ActionResult> GetById(int id)
+                {
+            var model = await _context.Veiculos
+                .Include(t => t.Consumos) 
+                .FirstOrDefaultAsync(v => v.Id == id);
+
+            if (model == null) return NotFound();
+
+            return Ok(model);
+        }
+
+------> O include vai servir para aquela propriedade de navegação pegar todos os consumos vinculados ao veículo.
+A propriedade está definida na model:  
+public ICollection<Consumo> Consumos { get; set; }
+ */
