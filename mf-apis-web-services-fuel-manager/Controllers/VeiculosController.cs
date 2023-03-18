@@ -19,8 +19,7 @@ namespace mf_apis_web_services_fuel_manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
-            var model = await _context.Veiculos.ToListAsync();
-
+            var model = await _context.Veiculos.ToListAsync();        
             return Ok(model);
         }
 
@@ -46,6 +45,8 @@ namespace mf_apis_web_services_fuel_manager.Controllers
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (model == null) return NotFound();
+            
+            GerarLinks(model); // Adicionando os links
 
             return Ok(model);
         }
@@ -79,7 +80,14 @@ namespace mf_apis_web_services_fuel_manager.Controllers
 
             return NoContent();             
         }
-    }
+
+        private void GerarLinks(Veiculo model)
+        {
+            model.Links.Add(new LinkDto(model.Id, Url.ActionLink(), rel: "self", metodo: "GET"));          
+            model.Links.Add(new LinkDto(model.Id, Url.ActionLink(), rel: "update", metodo: "PUT"));
+            model.Links.Add(new LinkDto(model.Id, Url.ActionLink(), rel: "delete", metodo: "DELETE"));
+        }
+    }    
 }
 
 
@@ -165,3 +173,13 @@ AsNoTracking(): Serve para não rastrear o dados, ou seja, a consulta não é pa
 A propriedade está definida na model:  
 public ICollection<Consumo> Consumos { get; set; }
  */
+
+
+/*
+   GerarLinks(model); // É adicionado no GETBYID para add os links antes do retorno do método
+ */
+/*
+ ------------------- ACTION LINK
+Url.ActionLink(): O Asp net fornece esse método padrão.
+ */
+
