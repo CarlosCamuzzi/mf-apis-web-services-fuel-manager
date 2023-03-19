@@ -1,10 +1,12 @@
 ﻿using mf_apis_web_services_fuel_manager.Models;
-using Microsoft.AspNetCore.Http;
+using mf_apis_web_services_fuel_manager.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace mf_apis_web_services_fuel_manager.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
@@ -83,10 +85,26 @@ namespace mf_apis_web_services_fuel_manager.Controllers
 
             return NoContent();
         }
+
+        [AllowAnonymous] // Permite usuário anônimo
+        [HttpPost("authenticate")]
+        public async Task<ActionResult> Authenticate(AuthenticateDto model)
+        {
+            var usuarioDb = await _context.Usuarios.FindAsync(model.Id);
+         
+            // Verifica se existe usuário e se a senha está correta
+            if (usuarioDb == null || !BCrypt.Net.BCrypt.Verify(model.Password, usuarioDb.Password)) return Unauthorized();
+
+            var tokenService = new TokenService();
+            var jwt = tokenService.GenerateJwtToken(usuarioDb);
+                        
+            return Ok(new {jwtToken = jwt});
+        }       
     }
 }
 
 
+//------------------------ ANOTAÇÕES
 /*
   [HttpPost]
         public async Task<ActionResult> Create(UsuarioDto model)
@@ -101,5 +119,14 @@ Dessa forma, vamos configurar um novo usuário para salva no banco.
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password), // Criptografando senha
                 Perfil = model.Perfil
             };
+ */
+
+/*---------------------- JWT GenerateJwtToken(Usuario model)
+1 - Cria um token
+2 - Associa a key 
+3 - Inclui os claims (declarações/atributos do usuário), ou seja, se adm, se é user...
+4 - Cria o token com os claims, data de expiração, critografa (signingcredentials)
+5 - Salva na variável token
+6 - Retorna o token
 
  */
