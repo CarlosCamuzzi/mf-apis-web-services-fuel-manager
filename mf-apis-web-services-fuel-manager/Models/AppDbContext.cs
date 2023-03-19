@@ -8,9 +8,31 @@ namespace mf_apis_web_services_fuel_manager.Models
         {
         }
 
+        // Configuração keys/relacionamento tabela VeiculoUsuarios
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            // PK Composta
+            builder.Entity<VeiculoUsuarios>()
+                .HasKey(c => new { c.VeiculoId, c.UsuarioId });
+
+            // Relacionamento 1 Veic : N User
+            builder.Entity<VeiculoUsuarios>()
+                .HasOne(c => c.Veiculo)
+                .WithMany(c => c.Usuarios)
+                .HasForeignKey(c => c.VeiculoId);
+
+            // Relacionamento 1 User : N Veic
+            builder.Entity<VeiculoUsuarios>()
+                .HasOne(c => c.Usuario)
+                .WithMany(c => c.Veiculos)
+                .HasForeignKey(c => c.UsuarioId);
+        }
+
         /* Entidades */
         public DbSet<Veiculo> Veiculos { get; set; }
         public DbSet<Consumo> Consumos { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<VeiculoUsuarios> VeiculoUsuarios { get; set; }
     }
 }
 
@@ -24,4 +46,10 @@ namespace mf_apis_web_services_fuel_manager.Models
 
 /* Para não precisar de criar instâncias da classe de forma programática, ou seja, criando classes e configurando manualmente.
   Com a injeção de dependência, apenas configuramos a classe e ela faz isso sem precisar de programar manual
+ */
+
+
+/*
+ PK compostas
+ .HasKey(c => new { c.VeiculoId, c.UsuarioId });        
  */

@@ -1,26 +1,23 @@
-﻿namespace mf_apis_web_services_fuel_manager.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace mf_apis_web_services_fuel_manager.Models
 {
+    [NotMapped]
     public class LinkDto
     {
-        private object id;
-
         public int Id { get; set; }
         public string Href { get; set; }    // Link
         public string Rel { get; set; }     // Método relacionado
-        public string Metodo { get; set; }  // Métdodo HTTP
+        public string Metodo { get; set; }  // Método HTTP
 
         public LinkDto(int id, string href, string rel, string metodo)
         {
-            Id = id;    
+            Id = id;
             Href = href;
             Rel = rel;
             Metodo = metodo;
         }
 
-        public LinkDto(object id)
-        {
-            this.id = id;
-        }
     }
     public class LinksHATEOS
     {

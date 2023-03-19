@@ -19,7 +19,7 @@ namespace mf_apis_web_services_fuel_manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
-            var model = await _context.Veiculos.ToListAsync();        
+            var model = await _context.Veiculos.ToListAsync();
             return Ok(model);
         }
 
@@ -39,13 +39,15 @@ namespace mf_apis_web_services_fuel_manager.Controllers
 
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(int id)
-                {
+        {
             var model = await _context.Veiculos
-                .Include(t => t.Consumos) 
+                .Include(t => t.Usuarios)
+                .ThenInclude(t => t.Usuario)
+                .Include(t => t.Consumos)
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (model == null) return NotFound();
-            
+
             GerarLinks(model); // Adicionando os links
 
             return Ok(model);
@@ -78,14 +80,40 @@ namespace mf_apis_web_services_fuel_manager.Controllers
             _context.Veiculos.Remove(model);
             await _context.SaveChangesAsync();
 
-            return NoContent();             
+            return NoContent();
         }
 
         private void GerarLinks(Veiculo model)
         {
-            model.Links.Add(new LinkDto(model.Id, Url.ActionLink(), rel: "self", metodo: "GET"));          
+            model.Links.Add(new LinkDto(model.Id, Url.ActionLink(), rel: "self", metodo: "GET"));
             model.Links.Add(new LinkDto(model.Id, Url.ActionLink(), rel: "update", metodo: "PUT"));
             model.Links.Add(new LinkDto(model.Id, Url.ActionLink(), rel: "delete", metodo: "DELETE"));
+        }
+
+        [HttpPost("{id}/usuarios")]
+        public async Task<ActionResult> AddUsuario(int id, VeiculoUsuarios model)
+        {
+            if (id != model.VeiculoId) return BadRequest();
+
+            _context.VeiculoUsuarios.Add(model);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetById", new {id = model.VeiculoId}, model);            
+        }
+
+        [HttpDelete("{id}/usuarios/{usuarioId}")]
+        public async Task<ActionResult> DeleteUsuario(int id, int usuarioId)
+        {
+            var model = await _context.VeiculoUsuarios
+                .Where(c => c.VeiculoId == id && c.UsuarioId == usuarioId)
+                .FirstOrDefaultAsync();
+
+            if (model == null) return NotFound();
+
+            _context.VeiculoUsuarios.Remove(model);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }    
 }
@@ -183,3 +211,16 @@ public ICollection<Consumo> Consumos { get; set; }
 Url.ActionLink(): O Asp net fornece esse método padrão.
  */
 
+/*
+ [HttpPost("{id}/usuarios")]
+Quando vamos criar rotars associaando um recurso a outro recurso, definir dessa forma
+
+        public async Task<ActionResult> AddUsuario
+    Serve para associar usuarios com os veiculos
+
+No getbyid vou adicionado:
+
+ .Include(t => t.Usuarios)
+ .ThenInclude(t => t.Usuario)
+Coloca os 2 pq a tabela usuarios, é do tipo veiculousuarios, nessa table só tem o ID, o Usuario é incluído também para recuperar as informações do usuário, não somente o id
+ */

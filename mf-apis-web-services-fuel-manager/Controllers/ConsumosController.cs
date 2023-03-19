@@ -61,7 +61,6 @@ namespace mf_apis_web_services_fuel_manager.Controllers
             return NoContent();
         }
 
-
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
